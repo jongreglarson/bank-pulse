@@ -1,0 +1,16 @@
+# Copy to ~/.dbt/profiles.yml and fill in your values.
+# This file documents the expected structure — never commit the real profiles.yml.
+
+bank_pulse_snowflake:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"   # e.g. xy12345.us-east-1
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"  # BANK_PULSE
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      schema: SILVER                                   # default; overridden per layer in dbt_project.yml
+      threads: 4

@@ -1,30 +1,36 @@
 """
-Ingest FDIC data into Databricks bronze layer.
+Ingest FDIC data into Databricks bronze layer (Community Edition compatible).
 
-Writes raw JSON to a Unity Catalog Volume, then loads into bronze Delta tables
-via COPY INTO. Requires DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH
-and DATABRICKS_CATALOG env vars (loaded from .env).
+Uses DBFS for file storage and cluster-based SQL via the Databricks SQL connector.
+No Unity Catalog required — targets the Hive metastore.
+
+Required env vars (see .env.example):
+    DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH
 """
 
+import base64
 import json
 import os
 from datetime import datetime, timezone
-from pathlib import Path
 
+import requests
 from databricks import sql
-from databricks.sdk import WorkspaceClient
 from dotenv import load_dotenv
 
 from fdic_client import fetch_failures, fetch_history, fetch_institutions, fetch_summary
 
 load_dotenv()
 
-HOST = os.environ["DATABRICKS_HOST"]
+_host = os.environ["DATABRICKS_HOST"].rstrip("/")
+HOST_URL = _host if _host.startswith("http") else f"https://{_host}"
+HOSTNAME = HOST_URL.replace("https://", "").replace("http://", "")
 TOKEN = os.environ["DATABRICKS_TOKEN"]
 HTTP_PATH = os.environ["DATABRICKS_HTTP_PATH"]
-CATALOG = os.environ.get("DATABRICKS_CATALOG", "bank_pulse")
-SCHEMA_BRONZE = "bronze"
-VOLUME_PATH = f"/Volumes/{CATALOG}/{SCHEMA_BRONZE}/raw_json"
+
+DATABASE = os.environ.get("DATABRICKS_DATABASE", "bank_pulse")
+BRONZE_DB = f"{DATABASE}_bronze"
+DBFS_BASE = f"dbfs:/{DATABASE}/raw"
+CHUNK_SIZE = 900_000  # DBFS add-block limit is 1MB; stay under
 
 ENDPOINTS = {
     "institutions": fetch_institutions,
@@ -38,30 +44,63 @@ def _timestamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
-def upload_to_volume(client: WorkspaceClient, endpoint: str, records: list[dict]) -> str:
-    """Upload a JSON file to the Unity Catalog Volume and return the volume path."""
+def _headers() -> dict:
+    return {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
+
+
+def upload_to_dbfs(endpoint: str, records: list[dict]) -> None:
+    """Upload newline-delimited JSON to DBFS using the chunked block API."""
     filename = f"{endpoint}_{_timestamp()}.json"
-    volume_file_path = f"{VOLUME_PATH}/{endpoint}/{filename}"
+    dbfs_path = f"{DBFS_BASE}/{endpoint}/{filename}"
+    payload = "\n".join(json.dumps(r) for r in records).encode("utf-8")
 
-    payload = "\n".join(json.dumps(r) for r in records)  # newline-delimited JSON
+    resp = requests.post(
+        f"{HOST_URL}/api/2.0/dbfs/create",
+        headers=_headers(),
+        json={"path": dbfs_path, "overwrite": True},
+    )
+    resp.raise_for_status()
+    handle = resp.json()["handle"]
 
-    client.files.upload(volume_file_path, payload.encode("utf-8"), overwrite=True)
-    print(f"  Uploaded {len(records)} records → {volume_file_path}")
-    return volume_file_path
+    offset = 0
+    while offset < len(payload):
+        chunk = payload[offset : offset + CHUNK_SIZE]
+        requests.post(
+            f"{HOST_URL}/api/2.0/dbfs/add-block",
+            headers=_headers(),
+            json={"handle": handle, "data": base64.b64encode(chunk).decode()},
+        ).raise_for_status()
+        offset += CHUNK_SIZE
+
+    requests.post(
+        f"{HOST_URL}/api/2.0/dbfs/close",
+        headers=_headers(),
+        json={"handle": handle},
+    ).raise_for_status()
+
+    print(f"  Uploaded {len(records)} records → {dbfs_path}")
+
+
+def ensure_bronze_objects(cursor) -> None:
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {BRONZE_DB}")
+    for endpoint in ENDPOINTS:
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {BRONZE_DB}.{endpoint}
+            USING DELTA
+            TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true')
+        """)
 
 
 def copy_into_bronze(cursor, endpoint: str) -> None:
-    """COPY INTO the bronze Delta table from the Volume directory."""
-    table = f"{CATALOG}.{SCHEMA_BRONZE}.{endpoint}"
-    source = f"{VOLUME_PATH}/{endpoint}/"
-
+    table = f"{BRONZE_DB}.{endpoint}"
+    source = f"{DBFS_BASE}/{endpoint}/"
     cursor.execute(f"""
         COPY INTO {table}
         FROM (
             SELECT
                 *,
                 _metadata.file_name AS _source_file,
-                current_timestamp()  AS _loaded_at
+                current_timestamp() AS _loaded_at
             FROM '{source}'
         )
         FILEFORMAT = JSON
@@ -71,28 +110,21 @@ def copy_into_bronze(cursor, endpoint: str) -> None:
     print(f"  COPY INTO {table} complete")
 
 
-def ensure_bronze_tables(cursor) -> None:
-    cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA_BRONZE}")
-    for endpoint in ENDPOINTS:
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {CATALOG}.{SCHEMA_BRONZE}.{endpoint}
-            USING DELTA
-            TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true')
-        """)
-
-
 def main() -> None:
-    client = WorkspaceClient(host=HOST, token=TOKEN)
-
-    with sql.connect(server_hostname=HOST, http_path=HTTP_PATH, access_token=TOKEN) as conn:
+    print(f"Connecting to {HOSTNAME}...")
+    with sql.connect(
+        server_hostname=HOSTNAME,
+        http_path=HTTP_PATH,
+        access_token=TOKEN,
+    ) as conn:
         with conn.cursor() as cursor:
-            ensure_bronze_tables(cursor)
+            ensure_bronze_objects(cursor)
 
             for endpoint, fetch_fn in ENDPOINTS.items():
                 print(f"\nFetching {endpoint}...")
                 records = fetch_fn()
                 print(f"  Retrieved {len(records)} records")
-                upload_to_volume(client, endpoint, records)
+                upload_to_dbfs(endpoint, records)
                 copy_into_bronze(cursor, endpoint)
 
     print("\nDatabricks bronze load complete.")

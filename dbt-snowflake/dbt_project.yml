@@ -1,0 +1,24 @@
+name: bank_pulse_snowflake
+version: '1.0.0'
+config-version: 2
+
+profile: bank_pulse_snowflake
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  bank_pulse_snowflake:
+    staging:
+      +materialized: view
+      +schema: SILVER
+    intermediate:
+      +materialized: view
+      +schema: SILVER
+    marts:
+      +materialized: table
+      +schema: GOLD
+      +snowflake_warehouse: COMPUTE_WH

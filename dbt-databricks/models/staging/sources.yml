@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: bank_pulse_bronze
+    description: "Raw FDIC BankFind data loaded by ingestion/load_databricks.py."
+    tables:
+      - name: institutions
+        description: "All FDIC-insured institutions with quarterly financials. Loaded via COPY INTO from DBFS."
+      - name: history
+        description: "Charter event history per institution (mergers, name changes, new charters)."
+      - name: summary
+        description: "National banking industry aggregate financials by quarter."
+      - name: failures
+        description: "FDIC-recorded bank failure events."

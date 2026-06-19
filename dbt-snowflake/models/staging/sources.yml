@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: BANK_PULSE
+    schema: BRONZE
+    description: "Raw FDIC BankFind data loaded by ingestion/load_snowflake.py. Each row stores one JSON record as a VARIANT."
+    tables:
+      - name: institutions
+        description: "All FDIC-insured institutions with quarterly financials."
+      - name: history
+        description: "Charter event history per institution (mergers, name changes, new charters)."
+      - name: summary
+        description: "National banking industry aggregate financials by quarter."
+      - name: failures
+        description: "FDIC-recorded bank failure events."

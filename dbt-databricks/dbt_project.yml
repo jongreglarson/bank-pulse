@@ -1,0 +1,24 @@
+name: bank_pulse_databricks
+version: '1.0.0'
+config-version: 2
+
+profile: bank_pulse_databricks
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  bank_pulse_databricks:
+    staging:
+      +materialized: view
+      +schema: bank_pulse_silver
+    intermediate:
+      +materialized: view
+      +schema: bank_pulse_silver
+    marts:
+      +materialized: table
+      +schema: bank_pulse_gold
+      +file_format: delta
