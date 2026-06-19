@@ -2,11 +2,12 @@ version: 2
 
 sources:
   - name: bronze
+    catalog: main
     schema: bank_pulse_bronze
-    description: "Raw FDIC BankFind data loaded by ingestion/load_databricks.py."
+    description: "Raw FDIC BankFind data loaded by ingestion/load_databricks.py into Unity Catalog."
     tables:
       - name: institutions
-        description: "All FDIC-insured institutions with quarterly financials. Loaded via COPY INTO from DBFS."
+        description: "All FDIC-insured institutions with quarterly financials. Loaded via COPY INTO from Unity Catalog Volume."
       - name: history
         description: "Charter event history per institution (mergers, name changes, new charters)."
       - name: summary
