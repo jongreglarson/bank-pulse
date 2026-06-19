@@ -66,8 +66,9 @@ def stage_and_copy(cursor, endpoint: str, records: list[dict]) -> None:
         tmp_path = f.name
 
     try:
-        cursor.execute(f"PUT 'file://{tmp_path}' @{STAGE_NAME}/{endpoint.lower()}/ AUTO_COMPRESS=TRUE OVERWRITE=TRUE")
-        print(f"  PUT {len(records)} records → stage/{endpoint.lower()}/{filename}")
+        put_path = tmp_path.replace("\\", "/")
+        cursor.execute(f"PUT 'file:///{put_path}' @{STAGE_NAME}/{endpoint.lower()}/ AUTO_COMPRESS=TRUE OVERWRITE=TRUE")
+        print(f"  PUT {len(records)} records -> stage/{endpoint.lower()}/{filename}")
 
         table = f"{SF_DATABASE}.{SCHEMA_BRONZE}.{endpoint}"
         cursor.execute(f"""
