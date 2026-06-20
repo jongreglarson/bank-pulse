@@ -7,7 +7,7 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/01_bronze_ingestion
+            notebook_path: ../src/01_bronze_ingestion
             source: WORKSPACE
           run_if: ALL_SUCCESS
           timeout_seconds: 0
@@ -18,7 +18,7 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/02_silver_ingestion
+            notebook_path: ../src/02_silver_ingestion
             source: WORKSPACE
           run_if: ALL_SUCCESS
           timeout_seconds: 0
@@ -29,7 +29,7 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/03_gold_metrics
+            notebook_path: ../src/03_gold_metrics
             source: WORKSPACE
           run_if: ALL_SUCCESS
           timeout_seconds: 0
