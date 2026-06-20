@@ -1,0 +1,48 @@
+resources:
+  jobs:
+    bank_pulse_basic_job:
+      name: Bank-Pulse Basic Job
+      tasks:
+        - task_key: Bronze
+          disabled: false
+          email_notifications: {}
+          notebook_task:
+            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/01_bronze_ingestion
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+        - task_key: Silver
+          depends_on:
+            - task_key: Bronze
+          disabled: false
+          email_notifications: {}
+          notebook_task:
+            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/02_silver_ingestion
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+        - task_key: Gold
+          depends_on:
+            - task_key: Silver
+          disabled: false
+          email_notifications: {}
+          notebook_task:
+            notebook_path: /Workspace/Users/jonglarson@gmail.com/bank-pulse/databricks  - Manual/03_gold_metrics
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+      email_notifications:
+        no_alert_for_skipped_runs: false
+      git_source:
+        git_branch: main
+        git_provider: gitHub
+        git_url: https://github.com/jongreglarson/bank-pulse
+      max_concurrent_runs: 1
+      performance_target: PERFORMANCE_OPTIMIZED
+      queue:
+        enabled: true
+      timeout_seconds: 0
+      webhook_notifications: {}
