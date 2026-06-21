@@ -7,8 +7,8 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: ../src/01_bronze_ingestion.ipynb
-            source: WORKSPACE
+            notebook_path: src/01_bronze_ingestion
+            source: GIT
           run_if: ALL_SUCCESS
           timeout_seconds: 0
           webhook_notifications: {}
@@ -18,8 +18,8 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: ../src/02_silver_ingestion.ipynb
-            source: WORKSPACE
+            notebook_path: src/02_silver_ingestion
+            source: GIT
           run_if: ALL_SUCCESS
           timeout_seconds: 0
           webhook_notifications: {}
@@ -29,8 +29,8 @@ resources:
           disabled: false
           email_notifications: {}
           notebook_task:
-            notebook_path: ../src/03_gold_metrics.ipynb
-            source: WORKSPACE
+            notebook_path: src/03_gold_metrics
+            source: GIT
           run_if: ALL_SUCCESS
           timeout_seconds: 0
           webhook_notifications: {}
