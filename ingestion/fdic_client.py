@@ -11,15 +11,22 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_DELAY = 0.2  # seconds between pages to be polite
 
 
-def fetch_endpoint(endpoint: str, fields: list[str], filters: str = "", delay: float = DEFAULT_DELAY) -> list[dict]:
-    """Pull all records from a FDIC endpoint, handling pagination automatically."""
+def fetch_endpoint(endpoint: str, fields: list[str], filters: str = "", delay: float = DEFAULT_DELAY, max_records: int = 0) -> list[dict]:
+    """Pull records from a FDIC endpoint, handling pagination automatically.
+    Pass max_records > 0 to cap how many rows are fetched."""
     offset = 0
     results = []
 
     while True:
+        limit = DEFAULT_PAGE_SIZE
+        if max_records > 0:
+            limit = min(DEFAULT_PAGE_SIZE, max_records - len(results))
+            if limit <= 0:
+                break
+
         params = {
             "fields": ",".join(fields),
-            "limit": DEFAULT_PAGE_SIZE,
+            "limit": limit,
             "offset": offset,
             "output": "json",
         }
@@ -62,3 +69,8 @@ def fetch_summary() -> list[dict]:
 def fetch_failures() -> list[dict]:
     fields = ["cert", "name", "faildate", "savr", "restype", "cost", "qbfdep", "asset"]
     return fetch_endpoint("failures", fields)
+
+
+def fetch_financials(max_records: int = 50000) -> list[dict]:
+    fields = ["REPDTE", "CERT", "INTINC", "EINTEXP", "NIEXP", "NETINC", "ASSET", "DEP", "LNLSNET", "NPERFV", "RBC1RWAJ", "ROA", "ROE"]
+    return fetch_endpoint("financials", fields, delay=0.5, max_records=max_records)

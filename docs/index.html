@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Pulse — Data Engineering Portfolio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.3px;
+    }
+    .header-left .tagline {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .header-right a {
+      font-size: 13px;
+      color: #60a5fa;
+      text-decoration: none;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 6px 14px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .header-right a:hover { background: #1e293b; border-color: #60a5fa; }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 860px;
+      margin: 60px auto 0;
+      padding: 0 40px;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 38px;
+      font-weight: 800;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .hero h2 span { color: #38bdf8; }
+    .hero p {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-top: 16px;
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Source badge ── */
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 24px;
+    }
+    .source-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    /* ── Section ── */
+    section {
+      max-width: 960px;
+      margin: 60px auto 0;
+      padding: 0 40px;
+    }
+    section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    /* ── Pipeline flow ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .flow-step {
+      flex: 1;
+      padding: 20px 24px;
+      border-right: 1px solid #334155;
+    }
+    .flow-step:last-child { border-right: none; }
+    .flow-step .layer {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .flow-step.bronze .layer { color: #f59e0b; }
+    .flow-step.silver .layer { color: #94a3b8; }
+    .flow-step.gold   .layer { color: #fbbf24; }
+    .flow-step .table-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f1f5f9;
+      font-family: 'Courier New', monospace;
+    }
+    .flow-step .desc {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .flow-arrow {
+      color: #334155;
+      font-size: 18px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Approach cards ── */
+    .approaches {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #475569; }
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .card-icon.db  { background: #ff3621; }
+    .card-icon.dlt { background: #0f62fe; }
+    .card-icon.sf  { background: #29b5e8; }
+    .card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .card .subtitle {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .card p {
+      font-size: 13px;
+      color: #94a3b8;
+      flex: 1;
+    }
+    .card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .card ul li {
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .card ul li::before {
+      content: '→';
+      color: #475569;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .card .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+    .tag.red    { background: #450a0a; color: #fca5a5; border: 1px solid #991b1b; }
+    .tag.blue   { background: #0c1a3d; color: #93c5fd; border: 1px solid #1e40af; }
+    .tag.cyan   { background: #0a2540; color: #67e8f9; border: 1px solid #0e7490; }
+    .tag.green  { background: #052e16; color: #86efac; border: 1px solid #166534; }
+    .tag.purple { background: #2e1065; color: #c4b5fd; border: 1px solid #6d28d9; }
+    .tag.slate  { background: #0f172a; color: #94a3b8; border: 1px solid #334155; }
+
+    /* ── Comparison table ── */
+    .compare-wrap {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      padding: 12px 20px;
+      text-align: left;
+      font-weight: 600;
+      color: #94a3b8;
+      background: #0f172a;
+      border-bottom: 1px solid #334155;
+    }
+    thead th:first-child { color: #64748b; font-weight: 400; }
+    tbody tr { border-bottom: 1px solid #1e293b; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #263347; }
+    tbody td {
+      padding: 11px 20px;
+      color: #cbd5e1;
+      vertical-align: top;
+    }
+    tbody td:first-child { color: #64748b; font-size: 12px; }
+    .check { color: #22c55e; }
+    .dash  { color: #334155; }
+
+    /* ── Stats row ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .stat {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .stat .value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #f1f5f9;
+      letter-spacing: -1px;
+    }
+    .stat .label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      max-width: 960px;
+      margin: 60px auto 40px;
+      padding: 0 40px;
+      border-top: 1px solid #1e293b;
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #475569;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .approaches { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .flow { flex-direction: column; }
+      .flow-step { border-right: none; border-bottom: 1px solid #334155; }
+      .flow-step:last-child { border-bottom: none; }
+      .flow-arrow { display: none; }
+      header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1>Bank Pulse</h1>
+      <div class="tagline">Multi-platform data engineering portfolio · FDIC BankFind Suite</div>
+    </div>
+    <div class="header-right">
+      <a href="https://github.com/jongreglarson/bank-pulse" target="_blank">GitHub →</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h2>Three ways to build<br>the <span>same pipeline</span></h2>
+    <p>
+      Bank Pulse ingests FDIC financial data on every insured U.S. institution and transforms it
+      through a Bronze → Silver → Gold medallion architecture — implemented three different ways
+      so each approach can be directly compared.
+    </p>
+    <div class="source-badge">
+      <span class="dot"></span>
+      Source: FDIC BankFind Suite API · ~27,000 institutions · quarterly since 1992
+    </div>
+  </div>
+
+  <!-- Medallion flow -->
+  <section>
+    <h3>Medallion Architecture</h3>
+    <div class="flow">
+      <div class="flow-step bronze">
+        <div class="layer">Bronze</div>
+        <div class="table-name">bronze_financials</div>
+        <div class="desc">Raw JSON from FDIC API · 50k records · ingested_at, batch_id metadata</div>
+      </div>
+      <div class="flow-step silver">
+        <div class="layer">Silver</div>
+        <div class="table-name">silver_financials</div>
+        <div class="desc">Typed columns · deduplicated by cert + report_date · DQ flags</div>
+      </div>
+      <div class="flow-step gold">
+        <div class="layer">Gold</div>
+        <div class="table-name">gold_bank_metrics</div>
+        <div class="desc">NIM · NPL ratio · peer group · QoQ changes per institution</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ingestion approach cards -->
+  <section>
+    <h3>Ingestion Approaches</h3>
+    <div class="approaches">
+
+      <!-- Databricks Jobs -->
+      <div class="card">
+        <div class="card-icon db">⚡</div>
+        <div>
+          <h4>Databricks Jobs</h4>
+          <div class="subtitle">Notebook-based orchestration</div>
+        </div>
+        <p>
+          Three PySpark notebooks wired together as sequential job tasks.
+          Each layer reads from and writes to Delta tables explicitly, with
+          full control over partitioning and schema management.
+        </p>
+        <ul>
+          <li>Task DAG declared with <code>depends_on</code> in job YAML</li>
+          <li>Delta Lake writes via <code>.write.saveAsTable()</code></li>
+          <li>DQ tracked as boolean flag columns in silver layer</li>
+          <li>GIT source — notebooks pulled from GitHub at runtime</li>
+        </ul>
+        <div class="tag-row">
+          <span class="tag red">PySpark</span>
+          <span class="tag red">Delta Lake</span>
+          <span class="tag slate">DAB</span>
+        </div>
+      </div>
+
+      <!-- Databricks DLT -->
+      <div class="card">
+        <div class="card-icon dlt">🔷</div>
+        <div>
+          <h4>Databricks DLT Pipeline</h4>
+          <div class="subtitle">Delta Live Tables · declarative</div>
+        </div>
+        <p>
+          The same Bronze → Silver → Gold logic rewritten using DLT decorators.
+          The pipeline infers execution order from <code>dlt.read()</code> references
+          and tracks data quality natively in the pipeline event log.
+        </p>
+        <ul>
+          <li>DAG auto-inferred from <code>dlt.read()</code> references</li>
+          <li>DLT manages persistence — no explicit writes</li>
+          <li>DQ via <code>@dlt.expect</code> — metrics in event log</li>
+          <li>Triggered or continuous mode via <code>continuous: false</code></li>
+        </ul>
+        <div class="tag-row">
+          <span class="tag blue">DLT</span>
+          <span class="tag red">PySpark</span>
+          <span class="tag slate">DAB</span>
+        </div>
+      </div>
+
+      <!-- dbt-Snowflake -->
+      <div class="card">
+        <div class="card-icon sf">❄️</div>
+        <div>
+          <h4>dbt + Snowflake</h4>
+          <div class="subtitle">SQL-first transformations</div>
+        </div>
+        <p>
+          Bronze data loaded into Snowflake via internal stage and COPY INTO.
+          dbt builds a silver view and a gold table using pure SQL, with
+          built-in testing and schema documentation.
+        </p>
+        <ul>
+          <li>Bronze loaded by <code>load_snowflake.py</code> via COPY INTO</li>
+          <li><code>stg_financials</code> view — cleans and deduplicates</li>
+          <li><code>gold_bank_metrics</code> table — NIM, peer group, QoQ</li>
+          <li>dbt tests enforce not-null constraints on key columns</li>
+        </ul>
+        <div class="tag-row">
+          <span class="tag cyan">Snowflake</span>
+          <span class="tag green">dbt</span>
+          <span class="tag purple">SQL</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Comparison table -->
+  <section>
+    <h3>Approach Comparison</h3>
+    <div class="compare-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Databricks Jobs</th>
+            <th>Databricks DLT</th>
+            <th>dbt + Snowflake</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DAG wiring</td>
+            <td>Manual <code>depends_on</code></td>
+            <td>Auto-inferred from <code>dlt.read()</code></td>
+            <td>Auto-inferred from <code>ref()</code></td>
+          </tr>
+          <tr>
+            <td>Write semantics</td>
+            <td>Explicit overwrite + partitionBy</td>
+            <td>Managed by DLT engine</td>
+            <td>Managed by dbt + Snowflake</td>
+          </tr>
+          <tr>
+            <td>Data quality</td>
+            <td>Boolean flag columns</td>
+            <td><code>@dlt.expect</code> metrics</td>
+            <td>dbt schema tests</td>
+          </tr>
+          <tr>
+            <td>Schema evolution</td>
+            <td>Manual <code>overwriteSchema</code></td>
+            <td>Automatic</td>
+            <td>Automatic</td>
+          </tr>
+          <tr>
+            <td>Lineage tracking</td>
+            <td class="dash">—</td>
+            <td>Native in Unity Catalog</td>
+            <td>dbt docs DAG</td>
+          </tr>
+          <tr>
+            <td>Execution model</td>
+            <td>Batch · task per notebook</td>
+            <td>Triggered or continuous</td>
+            <td>Batch · dbt run</td>
+          </tr>
+          <tr>
+            <td>Language</td>
+            <td>PySpark</td>
+            <td>PySpark + DLT decorators</td>
+            <td>SQL</td>
+          </tr>
+          <tr>
+            <td>Output namespace</td>
+            <td><code>main.bank_pulse</code></td>
+            <td><code>main.bank_pulse_dlt</code></td>
+            <td><code>BANK_PULSE.GOLD</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <h3>Data at a Glance</h3>
+    <div class="stats">
+      <div class="stat">
+        <div class="value">27k</div>
+        <div class="label">FDIC institutions</div>
+      </div>
+      <div class="stat">
+        <div class="value">50k</div>
+        <div class="label">Financial records (bronze)</div>
+      </div>
+      <div class="stat">
+        <div class="value">5</div>
+        <div class="label">Asset-based peer groups</div>
+      </div>
+      <div class="stat">
+        <div class="value">3</div>
+        <div class="label">Pipeline implementations</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Bank Pulse · Jon Larson · Data Engineering Portfolio</span>
+    <span>
+      <a href="https://github.com/jongreglarson/bank-pulse" target="_blank">github.com/jongreglarson/bank-pulse</a>
+    </span>
+  </footer>
+
+</body>
+</html>

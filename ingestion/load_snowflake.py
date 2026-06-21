@@ -14,7 +14,7 @@ from pathlib import Path
 import snowflake.connector
 from dotenv import load_dotenv
 
-from fdic_client import fetch_failures, fetch_history, fetch_institutions, fetch_summary
+from fdic_client import fetch_failures, fetch_financials, fetch_history, fetch_institutions, fetch_summary
 
 load_dotenv()
 
@@ -32,6 +32,7 @@ ENDPOINTS = {
     "HISTORY": fetch_history,
     "SUMMARY": fetch_summary,
     "FAILURES": fetch_failures,
+    "FINANCIALS": fetch_financials,
 }
 
 

@@ -1,8 +1,8 @@
 version: 2
 
 models:
-  - name: stg_institutions
-    description: "Light cleaning of raw FDIC institution VARIANT data. One row per institution per report date."
+  - name: stg_financials
+    description: "Cleaned and deduplicated per-institution quarterly financials. Mirrors the bundle's silver_financials layer."
     columns:
       - name: cert
         description: "FDIC certificate number."
@@ -12,35 +12,7 @@ models:
         description: "Quarter-end report date."
         tests:
           - not_null
-      - name: total_assets_thousands
+      - name: total_assets
         description: "Total assets in thousands of dollars."
-        tests:
-          - not_null
-
-  - name: stg_history
-    description: "One row per charter event (merger, name change, new charter, etc.)."
-    columns:
-      - name: cert
-        tests:
-          - not_null
-      - name: process_date
-        tests:
-          - not_null
-
-  - name: stg_summary
-    description: "National banking industry aggregate financials. One row per report date."
-    columns:
-      - name: report_date
-        tests:
-          - not_null
-          - unique
-
-  - name: stg_failures
-    description: "One row per FDIC-recorded bank failure."
-    columns:
-      - name: cert
-        tests:
-          - not_null
-      - name: failure_date
         tests:
           - not_null

@@ -1,47 +1,14 @@
 version: 2
 
 models:
-  - name: dim_institutions
-    description: "Latest snapshot of each FDIC-insured institution. One row per bank."
+  - name: gold_bank_metrics
+    description: "Gold analytics layer with business metrics, peer groupings, and QoQ changes. Mirrors the bundle's gold_bank_metrics table."
     columns:
       - name: cert
-        description: "FDIC certificate number (primary key)."
-        tests:
-          - not_null
-          - unique
-
-  - name: dim_states
-    description: "Unique states with aggregate institution counts, based on the latest report date per bank."
-    columns:
-      - name: state_name
-        tests:
-          - not_null
-          - unique
-
-  - name: fct_bank_financials
-    description: "Per-institution financial metrics by report quarter. Primary analytical fact table."
-    columns:
-      - name: cert
+        description: "FDIC certificate number."
         tests:
           - not_null
       - name: report_date
+        description: "Quarter-end report date."
         tests:
           - not_null
-
-  - name: fct_failures
-    description: "Bank failure events with financial context at time of failure."
-    columns:
-      - name: cert
-        tests:
-          - not_null
-      - name: failure_date
-        tests:
-          - not_null
-
-  - name: fct_industry_summary
-    description: "National banking industry aggregate financials by quarter."
-    columns:
-      - name: report_date
-        tests:
-          - not_null
-          - unique
