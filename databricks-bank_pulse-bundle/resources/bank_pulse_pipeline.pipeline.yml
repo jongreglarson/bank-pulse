@@ -1,0 +1,19 @@
+resources:
+  pipelines:
+    bank_pulse_pipeline:
+      name: Bank-Pulse DLT Pipeline
+      catalog: main
+      target: bank_pulse_dlt
+      libraries:
+        - notebook:
+            path: ${workspace.file_path}/src/01_bronze_ingestion_pipeline
+        - notebook:
+            path: ${workspace.file_path}/src/02_silver_ingestion_pipeline
+        - notebook:
+            path: ${workspace.file_path}/src/03_gold_metrics_pipeline
+      clusters:
+        - label: default
+          num_workers: 1
+      continuous: false
+      channel: CURRENT
+      edition: ADVANCED
