@@ -11,9 +11,7 @@ resources:
             path: ${workspace.file_path}/src/02_silver_ingestion_pipeline
         - notebook:
             path: ${workspace.file_path}/src/03_gold_metrics_pipeline
-      clusters:
-        - label: default
-          num_workers: 1
+      serverless: true
       continuous: false
       channel: CURRENT
       edition: ADVANCED
